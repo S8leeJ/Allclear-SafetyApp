@@ -33,7 +33,14 @@ export default function Navbar() {
   return (
     <nav className="fixed left-0 top-0 h-full w-64 bg-black/80 backdrop-blur-sm border-r border-gray-700 flex flex-col">
       <div className="p-6 border-b border-gray-700">
-        <h1 className="text-2xl font-bold text-white">AllClear</h1>
+        <div className="flex items-center space-x-3">
+          <img
+            src="/officiallogo.png"
+            alt="AllClear Logo"
+            className="w-10 h-10 object-contain"
+          />
+          <h1 className="text-2xl font-bold text-white">AllClear</h1>
+        </div>
       </div>
       
       <div className="flex-1 p-6">
