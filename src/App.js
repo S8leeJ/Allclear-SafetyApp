@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Friends from './pages/Friends';
+import Testing from './pages/Testing';
 
 export default function App() {
   return (
@@ -13,6 +14,8 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/friends" element={<Friends />} />
+            <Route path="/testing" element={<Testing />} />
+
           </Routes>
         </div>
       </div>
