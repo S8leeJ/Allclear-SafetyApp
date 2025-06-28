@@ -61,7 +61,7 @@ export default function Navbar() {
             to="/testing" 
             className="block px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-600/20 rounded-lg transition-colors duration-200"
           >
-            Testing
+            News
           </Link>
         </div>
       </div>
