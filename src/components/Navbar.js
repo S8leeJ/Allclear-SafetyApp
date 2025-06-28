@@ -2,13 +2,52 @@ import { Link } from 'react-router-dom';
 
 export default function Navbar() {
   return (
-    <nav className="px-6 py-5 flex justify-between items-center text-2xl">
-      <h1 className="text-1xl font-bold text-white-100">AllClear</h1>
-      <div className="space-x-5">
-        <Link to="/" className="text-white-400 hover:text-blue-400">Home</Link>
-        <Link to="/friends" className="text-white-400 hover:text-blue-400">Friends</Link>
-        <Link to="/testing" className="text-white-400 hover:text-blue-400">Testing</Link>
+    <nav className="fixed left-0 top-0 h-full w-64 bg-black/80 backdrop-blur-sm border-r border-gray-700 flex flex-col">
+      <div className="p-6 border-b border-gray-700">
+        <h1 className="text-2xl font-bold text-white">AllClear</h1>
+      </div>
+      
+      <div className="flex-1 p-6">
+        <div className="space-y-4">
+          <Link 
+            to="/" 
+            className="block px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-600/20 rounded-lg transition-colors duration-200"
+          >
+            Home
+          </Link>
+          <Link 
+            to="/friends" 
+            className="block px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-600/20 rounded-lg transition-colors duration-200"
+          >
+            Friends
+          </Link>
+          <Link 
+            to="/testing" 
+            className="block px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-600/20 rounded-lg transition-colors duration-200"
+          >
+            Testing
+          </Link>
+        </div>
+      </div>
 
+      {/* Profile Section */}
+      <div className="p-6 border-t border-gray-700">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+            <span className="text-white font-semibold text-sm">JD</span>
+          </div>
+          <div className="flex-1">
+            <p className="text-white font-medium text-sm">John Doe</p>
+            <p className="text-gray-400 text-xs">john.doe@example.com</p>
+          </div>
+        </div>
+        
+        <Link 
+          to="/settings" 
+          className="block px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-600/20 rounded-lg transition-colors duration-200 text-sm"
+        >
+          Settings
+        </Link>
       </div>
     </nav>
   );
