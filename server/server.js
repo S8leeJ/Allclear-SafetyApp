@@ -64,6 +64,11 @@ const validateSignin = [
   body('password').notEmpty().withMessage('Password is required'),
 ];
 
+const validatePasswordChange = [
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters long'),
+];
+
 // Routes
 
 // Health check
@@ -229,6 +234,67 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'Email already in use' });
     }
     
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Change password (protected)
+app.put('/api/user/change-password', authenticateToken, validatePasswordChange, async (req, res) => {
+  try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        message: 'Validation failed', 
+        errors: errors.array() 
+      });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Verify current password
+    const isValidPassword = await user.comparePassword(currentPassword);
+    if (!isValidPassword) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      message: 'Password changed successfully'
+    });
+
+  } catch (error) {
+    console.error('Password change error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Delete account (protected)
+app.delete('/api/user/delete-account', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Delete the user
+    await User.findByIdAndDelete(req.user._id);
+
+    res.json({
+      message: 'Account deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Account deletion error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
