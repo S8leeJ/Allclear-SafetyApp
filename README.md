@@ -1,70 +1,198 @@
-# Getting Started with Create React App
+# AllClear - Authentication System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern React application with a complete authentication system, featuring a sidebar navigation and secure backend API.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- 🔐 **Complete Authentication System**
+  - User registration and login
+  - JWT token-based authentication
+  - Protected routes
+  - Password strength validation
+  - Form validation
 
-### `npm start`
+- 🎨 **Modern UI/UX**
+  - Responsive sidebar navigation
+  - Dark theme with blue accents
+  - Smooth animations and transitions
+  - User profile display
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- 🛡️ **Security Features**
+  - Password hashing with bcrypt
+  - JWT token authentication
+  - Input validation and sanitization
+  - Protected API endpoints
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Project Structure
 
-### `npm test`
+```
+allclear/
+├── src/                    # React frontend
+│   ├── components/         # Reusable components
+│   ├── context/           # React context providers
+│   ├── pages/             # Page components
+│   └── App.js             # Main app component
+├── server/                # Express.js backend
+│   ├── server.js          # Main server file
+│   └── package.json       # Backend dependencies
+└── package.json           # Frontend dependencies
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Quick Start
 
-### `npm run build`
+### Prerequisites
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Node.js (v14 or higher)
+- npm or yarn
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Backend Setup
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. **Navigate to the server directory:**
+   ```bash
+   cd server
+   ```
 
-### `npm run eject`
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3. **Create environment file (optional):**
+   ```bash
+   # Create .env file in server directory
+   echo "JWT_SECRET=your-super-secret-key-here" > .env
+   echo "PORT=5000" >> .env
+   ```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4. **Start the backend server:**
+   ```bash
+   npm run dev
+   ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+   The server will start on `http://localhost:5000`
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Frontend Setup
 
-## Learn More
+1. **Navigate to the project root:**
+   ```bash
+   cd ..  # if you're in the server directory
+   ```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+3. **Start the React development server:**
+   ```bash
+   npm start
+   ```
 
-### Code Splitting
+   The app will open on `http://localhost:3000`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## API Endpoints
 
-### Analyzing the Bundle Size
+### Authentication
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- `POST /api/auth/signup` - User registration
+- `POST /api/auth/signin` - User login
 
-### Making a Progressive Web App
+### User Management
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- `GET /api/user/profile` - Get user profile (protected)
+- `PUT /api/user/profile` - Update user profile (protected)
 
-### Advanced Configuration
+### Health Check
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- `GET /api/health` - API health status
 
-### Deployment
+## Usage
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+1. **First Time Setup:**
+   - Open `http://localhost:3000`
+   - You'll be redirected to the sign-in page
+   - Click "Sign up" to create a new account
 
-### `npm run build` fails to minify
+2. **Creating an Account:**
+   - Fill in your first name, last name, email, and password
+   - The password strength indicator will help you create a secure password
+   - Accept the terms and conditions
+   - Click "Create Account"
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+3. **Signing In:**
+   - Enter your email and password
+   - Optionally check "Remember me"
+   - Click "Sign In"
+
+4. **Navigation:**
+   - Use the sidebar to navigate between pages
+   - Your profile information is displayed at the bottom of the sidebar
+   - Click "Sign Out" to log out
+
+## Development
+
+### Frontend Development
+
+The React app uses:
+- **React Router** for navigation
+- **Context API** for state management
+- **Tailwind CSS** for styling
+- **Protected Routes** for authentication
+
+### Backend Development
+
+The Express server includes:
+- **JWT authentication** with jsonwebtoken
+- **Password hashing** with bcryptjs
+- **Input validation** with express-validator
+- **CORS** enabled for cross-origin requests
+
+### Adding New Features
+
+1. **New Protected Routes:**
+   - Create the page component in `src/pages/`
+   - Add the route to `App.js` wrapped with `ProtectedRoute`
+   - Add navigation link to the sidebar in `Navbar.js`
+
+2. **New API Endpoints:**
+   - Add the route to `server/server.js`
+   - Use `authenticateToken` middleware for protected endpoints
+   - Add validation using express-validator
+
+## Security Notes
+
+- The current implementation uses in-memory storage for users
+- For production, replace with a proper database (MongoDB, PostgreSQL, etc.)
+- Use environment variables for sensitive data (JWT_SECRET, database credentials)
+- Implement rate limiting for API endpoints
+- Add HTTPS in production
+- Consider implementing refresh tokens for better security
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Backend not starting:**
+   - Check if port 5000 is available
+   - Ensure all dependencies are installed
+   - Check for syntax errors in server.js
+
+2. **Frontend can't connect to backend:**
+   - Verify the backend is running on port 5000
+   - Check the proxy configuration in package.json
+   - Ensure CORS is properly configured
+
+3. **Authentication issues:**
+   - Clear browser localStorage
+   - Check browser console for errors
+   - Verify JWT token is being sent in requests
+
+### Getting Help
+
+- Check the browser console for frontend errors
+- Check the terminal running the backend for server errors
+- Verify all dependencies are installed correctly
+
+## License
+
+MIT License - feel free to use this project for your own applications!
