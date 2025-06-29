@@ -1,38 +1,87 @@
 // src/components/AnimatedRadarLayer.js
-import { TileLayer } from 'react-leaflet';
-import { useEffect, useState } from 'react';
+import L from 'leaflet';
 
-export default function AnimatedRadarLayer() {
-  const [frames, setFrames] = useState([]);
-  const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
+class AnimatedRadarLayer extends L.Layer {
+  constructor(options = {}) {
+    super();
+    this.frames = [];
+    this.currentFrameIndex = 0;
+    this.interval = null;
+    this.options = {
+      opacity: 0.6,
+      ...options
+    };
+  }
 
-  // Fetch animation frames on mount
-  useEffect(() => {
-    fetch('https://tilecache.rainviewer.com/api/maps.json')
-      .then((res) => res.json())
-      .then((data) => setFrames(data));
-  }, []);
+  onAdd(map) {
+    this.map = map;
+    this.fetchFrames();
+    return this;
+  }
 
-  // Loop through radar frames
-  useEffect(() => {
-    if (!frames.length) return;
+  onRemove(map) {
+    this.stopAnimation();
+    if (this.currentLayer) {
+      map.removeLayer(this.currentLayer);
+    }
+    return this;
+  }
 
-    const interval = setInterval(() => {
-      setCurrentFrameIndex((i) => (i + 1) % frames.length);
-    }, 3000); // speed: 500ms/frame
+  async fetchFrames() {
+    try {
+      const response = await fetch('https://tilecache.rainviewer.com/api/maps.json');
+      const data = await response.json();
+      this.frames = data;
+      if (this.frames.length > 0) {
+        this.startAnimation();
+      }
+    } catch (error) {
+      console.error('Failed to fetch radar frames:', error);
+    }
+  }
 
-    return () => clearInterval(interval);
-  }, [frames]);
+  startAnimation() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
 
-  if (!frames.length) return null;
+    this.interval = setInterval(() => {
+      this.currentFrameIndex = (this.currentFrameIndex + 1) % this.frames.length;
+      this.updateRadarLayer();
+    }, 3000); // 3 seconds per frame
 
-  const currentFrame = frames[currentFrameIndex];
+    // Show first frame immediately
+    this.updateRadarLayer();
+  }
 
-  return (
-    <TileLayer
-      url={`https://tilecache.rainviewer.com/v2/radar/${currentFrame}/256/{z}/{x}/{y}/2/1_1.png`}
-      opacity={0.6}
-      attribution="Radar data © RainViewer"
-    />
-  );
+  stopAnimation() {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+    }
+  }
+
+  updateRadarLayer() {
+    if (!this.frames.length || !this.map) return;
+
+    const currentFrame = this.frames[this.currentFrameIndex];
+    
+    // Remove previous layer
+    if (this.currentLayer) {
+      this.map.removeLayer(this.currentLayer);
+    }
+
+    // Add new layer
+    this.currentLayer = L.tileLayer(
+      `https://tilecache.rainviewer.com/v2/radar/${currentFrame}/256/{z}/{x}/{y}/2/1_1.png`,
+      {
+        opacity: this.options.opacity,
+        attribution: 'Radar data © RainViewer'
+      }
+    );
+
+    this.currentLayer.addTo(this.map);
+  }
 }
+
+export default AnimatedRadarLayer;

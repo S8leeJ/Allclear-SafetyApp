@@ -5,6 +5,8 @@ const cors = require('cors');
 const { body, validationResult } = require('express-validator');
 const connectDB = require('./config/database');
 const User = require('./models/User');
+const Friend = require('./models/Friend');
+const Location = require('./models/Location');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -67,6 +69,13 @@ const validateSignin = [
 const validatePasswordChange = [
   body('currentPassword').notEmpty().withMessage('Current password is required'),
   body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters long'),
+];
+
+const validateFriend = [
+  body('username').trim().isLength({ min: 1 }).withMessage('Username is required'),
+  body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
+  body('location.lat').isFloat({ min: -90, max: 90 }).withMessage('Valid latitude is required'),
+  body('location.lng').isFloat({ min: -180, max: 180 }).withMessage('Valid longitude is required'),
 ];
 
 // Routes
@@ -299,6 +308,146 @@ app.delete('/api/user/delete-account', authenticateToken, async (req, res) => {
   }
 });
 
+// Friend Management Endpoints
+
+// Get all friends for a user (protected)
+app.get('/api/friends', authenticateToken, async (req, res) => {
+  try {
+    const friends = await Friend.findByUserId(req.user._id);
+    const friendsForMap = friends.map(friend => friend.toMapJSON());
+    
+    res.json({ friends: friendsForMap });
+  } catch (error) {
+    console.error('Get friends error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Add a new friend (protected)
+app.post('/api/friends', authenticateToken, validateFriend, async (req, res) => {
+  try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        message: 'Validation failed', 
+        errors: errors.array() 
+      });
+    }
+
+    const { username, email, location, status } = req.body;
+
+    // Check if friend already exists for this user
+    const existingFriend = await Friend.existsForUser(req.user._id, email);
+    if (existingFriend) {
+      return res.status(400).json({ message: 'Friend with this email already exists' });
+    }
+
+    // Create new friend
+    const newFriend = new Friend({
+      userId: req.user._id,
+      username,
+      email,
+      location,
+      status: status || 'Unknown'
+    });
+
+    await newFriend.save();
+
+    res.status(201).json({
+      message: 'Friend added successfully',
+      friend: newFriend.toMapJSON()
+    });
+
+  } catch (error) {
+    console.error('Add friend error:', error);
+    
+    // Handle MongoDB duplicate key error
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Friend with this email already exists' });
+    }
+    
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update friend status
+app.put('/api/friends/:id/status', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const userId = req.user.id;
+
+    const friend = await Friend.findOne({ _id: id, userId });
+    if (!friend) {
+      return res.status(404).json({ message: 'Friend not found' });
+    }
+
+    friend.status = status;
+    friend.lastUpdated = new Date();
+    await friend.save();
+
+    res.json({ friend });
+  } catch (error) {
+    console.error('Error updating friend status:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update friend location
+app.put('/api/friends/:id/location', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { lat, lng } = req.body;
+    const userId = req.user.id;
+
+    // Validate coordinates
+    if (typeof lat !== 'number' || typeof lng !== 'number' || 
+        lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      return res.status(400).json({ message: 'Invalid coordinates' });
+    }
+
+    const friend = await Friend.findOne({ _id: id, userId });
+    if (!friend) {
+      return res.status(404).json({ message: 'Friend not found' });
+    }
+
+    friend.location.lat = lat;
+    friend.location.lng = lng;
+    friend.lastUpdated = new Date();
+    await friend.save();
+
+    res.json({ friend });
+  } catch (error) {
+    console.error('Error updating friend location:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Delete friend (protected)
+app.delete('/api/friends/:friendId', authenticateToken, async (req, res) => {
+  try {
+    const { friendId } = req.params;
+
+    const friend = await Friend.findOne({ _id: friendId, userId: req.user._id });
+    
+    if (!friend) {
+      return res.status(404).json({ message: 'Friend not found' });
+    }
+
+    friend.isActive = false;
+    await friend.save();
+
+    res.json({
+      message: 'Friend removed successfully'
+    });
+
+  } catch (error) {
+    console.error('Delete friend error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // Get all users (for admin purposes - protected)
 app.get('/api/users', authenticateToken, async (req, res) => {
   try {
@@ -306,6 +455,97 @@ app.get('/api/users', authenticateToken, async (req, res) => {
     res.json({ users });
   } catch (error) {
     console.error('Get users error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Get all locations for a user
+app.get('/api/locations', authenticateToken, async (req, res) => {
+  try {
+    const locations = await Location.find({ userId: req.user.id });
+    res.json({ locations: locations.map(location => location.toMapJSON()) });
+  } catch (error) {
+    console.error('Error fetching locations:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Add a new location
+app.post('/api/locations', authenticateToken, async (req, res) => {
+  try {
+    const { name, type, location, description } = req.body;
+
+    if (!name || !location || !location.lat || !location.lng) {
+      return res.status(400).json({ message: 'Name and coordinates are required' });
+    }
+
+    // Validate coordinates
+    if (location.lat < -90 || location.lat > 90 || location.lng < -180 || location.lng > 180) {
+      return res.status(400).json({ message: 'Invalid coordinates' });
+    }
+
+    const newLocation = new Location({
+      userId: req.user.id,
+      name,
+      type: type || 'Other',
+      location: {
+        lat: location.lat,
+        lng: location.lng
+      },
+      description: description || ''
+    });
+
+    await newLocation.save();
+    res.status(201).json({ location: newLocation.toMapJSON() });
+  } catch (error) {
+    console.error('Error creating location:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update location coordinates
+app.put('/api/locations/:id/coordinates', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { lat, lng } = req.body;
+    const userId = req.user.id;
+
+    // Validate coordinates
+    if (typeof lat !== 'number' || typeof lng !== 'number' || 
+        lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      return res.status(400).json({ message: 'Invalid coordinates' });
+    }
+
+    const location = await Location.findOne({ _id: id, userId });
+    if (!location) {
+      return res.status(404).json({ message: 'Location not found' });
+    }
+
+    location.location.lat = lat;
+    location.location.lng = lng;
+    await location.save();
+
+    res.json({ location: location.toMapJSON() });
+  } catch (error) {
+    console.error('Error updating location coordinates:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Delete a location
+app.delete('/api/locations/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const location = await Location.findOneAndDelete({ _id: id, userId });
+    if (!location) {
+      return res.status(404).json({ message: 'Location not found' });
+    }
+
+    res.json({ message: 'Location deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting location:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

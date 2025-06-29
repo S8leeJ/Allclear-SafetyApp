@@ -1,242 +1,279 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import FriendsList from './FriendsList';
+import LocationsList from './LocationsList';
 import MapView from './MapView';
 
-const OPENWEATHER_API_KEY = process.env.REACT_APP_OPENWEATHER_API_KEY;
+const OPENWEATHER_API_KEY = '6faa37b4692e4cbe58cbf7709309db5c';
 
 export default function WeatherDashboard() {
-  const [city, setCity] = useState('');
-  const [weather, setWeather] = useState(null);
-  const [position, setPosition] = useState([29.7604, -95.3698]); // default Houston
-  const [error, setError] = useState('');
+  const { getAuthHeaders } = useAuth();
+  const [weatherData, setWeatherData] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [friends, setFriends] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [activeView, setActiveView] = useState('weather'); // 'weather', 'friends', 'locations'
+  const [mapCenter, setMapCenter] = useState([29.7604, -95.3698]); // default Houston
 
-  const fetchWeather = async (cityName) => {
+  useEffect(() => {
+    if (searchQuery) {
+      fetchWeatherData();
+    }
+  }, [searchQuery]);
+
+  const fetchWeatherData = async () => {
     setIsLoading(true);
     setError('');
     
     try {
-      const res = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${OPENWEATHER_API_KEY}&units=imperial`
-      );
-      const data = await res.json();
-
-      if (data.cod !== 200) {
-        setError(data.message);
-        setWeather(null);
-        return;
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${searchQuery}&appid=${process.env.REACT_APP_OPENWEATHER_API_KEY}&units=metric`);
+      
+      if (!response.ok) {
+        throw new Error('City not found');
       }
-
-      setWeather(data);
-      setPosition([data.coord.lat, data.coord.lon]);
+      
+      const data = await response.json();
+      setWeatherData(data);
+      // Update map center to the searched city
+      setMapCenter([data.coord.lat, data.coord.lon]);
     } catch (err) {
-      setError('Error fetching weather data');
+      setError(err.message);
+      setWeatherData(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSearch = (e) => {
     e.preventDefault();
-    if (city.trim()) fetchWeather(city);
+    if (searchQuery.trim()) {
+      fetchWeatherData();
+    }
   };
 
-  const getWeatherIcon = (weatherCode) => {
-    const weatherIcons = {
-      '01d': '☀️', '01n': '🌙',
-      '02d': '⛅', '02n': '☁️',
-      '03d': '☁️', '03n': '☁️',
-      '04d': '☁️', '04n': '☁️',
-      '09d': '🌧️', '09n': '🌧️',
-      '10d': '🌦️', '10n': '🌧️',
-      '11d': '⛈️', '11n': '⛈️',
-      '13d': '❄️', '13n': '❄️',
-      '50d': '🌫️', '50n': '🌫️'
-    };
-    return weatherIcons[weatherCode] || '🌤️';
+  const getWeatherIcon = (iconCode) => {
+    return `http://openweathermap.org/img/wn/${iconCode}@2x.png`;
+  };
+
+  const getWeatherDescription = (weather) => {
+    return weather[0]?.description || 'Unknown';
   };
 
   const getWindDirection = (degrees) => {
-    const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-    const index = Math.round(degrees / 22.5) % 16;
+    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const index = Math.round(degrees / 45) % 8;
     return directions[index];
   };
 
+  const handleFriendsUpdate = (updatedFriends) => {
+    setFriends(updatedFriends);
+  };
+
+  const handleLocationsUpdate = (updatedLocations) => {
+    setLocations(updatedLocations);
+  };
+
   return (
-    <div className="flex h-screen">
-      {/* Weather Dashboard Sidebar */}
-      <div className="w-96 p-6 bg-black/80 backdrop-blur-sm border-r border-gray-700 overflow-y-auto">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-white mb-2">Weather Search</h2>
-          <p className="text-gray-400 text-sm">Search for weather information by city</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">Weather & Safety Dashboard</h1>
+          <p className="text-gray-300">Monitor weather conditions and manage your safety network</p>
         </div>
 
-        {/* Search Form */}
-        <form onSubmit={handleSubmit} className="mb-6">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Enter city name..."
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button 
-              type="submit" 
-              disabled={isLoading}
-              className="absolute right-2 top-2 px-4 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+        {/* View Toggle Buttons */}
+        <div className="flex justify-center mb-6">
+          <div className="bg-black/30 rounded-lg p-1 border border-gray-700">
+            <button
+              onClick={() => setActiveView('weather')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeView === 'weather'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-black/20'
+              }`}
             >
-              {isLoading ? 'Searching...' : 'Search'}
+              🌤️ Weather
+            </button>
+            <button
+              onClick={() => setActiveView('friends')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeView === 'friends'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-black/20'
+              }`}
+            >
+              👥 Friends
+            </button>
+            <button
+              onClick={() => setActiveView('locations')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeView === 'locations'
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-black/20'
+              }`}
+            >
+              📍 Locations
             </button>
           </div>
-        </form>
+        </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500 text-red-300 rounded-lg">
-            {error}
+        {/* Map View - Shows both friends and locations with weather radar */}
+        <div className="mb-6">
+          <div className="bg-black/30 rounded-lg border border-gray-700">
+            <div className="p-4 border-b border-gray-700">
+              <h3 className="text-lg font-semibold text-white">Interactive Map with Weather Radar</h3>
+              <p className="text-gray-400 text-sm">View your friends, locations, and weather conditions</p>
+            </div>
+            <MapView 
+              friends={friends} 
+              locations={locations} 
+              center={mapCenter}
+            />
           </div>
-        )}
+        </div>
 
-        {/* Weather Information Grid */}
-        {weather && (
-          <div className="space-y-6">
-            {/* Current Weather Card */}
-            <div className="bg-black/30 rounded-lg p-6 border border-gray-700">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-white">{weather.name}, {weather.sys.country}</h3>
-                  <p className="text-gray-400 text-sm">{new Date().toLocaleDateString()}</p>
-                </div>
-                <div className="text-4xl">
-                  {getWeatherIcon(weather.weather[0].icon)}
-                </div>
-              </div>
-              
-              <div className="text-center mb-4">
-                <div className="text-5xl font-bold text-white mb-2">
-                  {Math.round(weather.main.temp)}°F
-                </div>
-                <p className="text-gray-300 capitalize">{weather.weather[0].description}</p>
-              </div>
+        {/* Weather View */}
+        {activeView === 'weather' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Search Section */}
+            <div className="lg:col-span-1">
+              <div className="bg-black/30 rounded-lg p-6 border border-gray-700">
+                <h2 className="text-xl font-bold text-white mb-4">Weather Search</h2>
+                <form onSubmit={handleSearch} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      City Name
+                    </label>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Enter city name..."
+                      className="w-full px-4 py-3 bg-black/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isLoading || !searchQuery.trim()}
+                    className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  >
+                    {isLoading ? 'Searching...' : 'Search Weather'}
+                  </button>
+                </form>
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="text-center p-3 bg-black/20 rounded-lg">
-                  <p className="text-gray-400">Feels Like</p>
-                  <p className="text-white font-semibold">{Math.round(weather.main.feels_like)}°F</p>
-                </div>
-                <div className="text-center p-3 bg-black/20 rounded-lg">
-                  <p className="text-gray-400">Humidity</p>
-                  <p className="text-white font-semibold">{weather.main.humidity}%</p>
-                </div>
+                {error && (
+                  <div className="mt-4 p-3 bg-red-500/20 border border-red-500 rounded-lg text-red-300">
+                    {error}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Detailed Weather Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Temperature Range */}
-              <div className="bg-black/30 rounded-lg p-4 border border-gray-700">
-                <div className="flex items-center mb-2">
-                  <span className="text-lg mr-2">🌡️</span>
-                  <h4 className="text-white font-semibold">Temperature</h4>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">High</span>
-                    <span className="text-white">{Math.round(weather.main.temp_max)}°F</span>
+            {/* Weather Display */}
+            <div className="lg:col-span-2">
+              {weatherData ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Current Weather */}
+                  <div className="bg-black/30 rounded-lg p-6 border border-gray-700">
+                    <h3 className="text-lg font-semibold text-white mb-4">Current Weather</h3>
+                    <div className="text-center">
+                      <img 
+                        src={getWeatherIcon(weatherData.weather[0].icon)} 
+                        alt="Weather icon" 
+                        className="mx-auto w-20 h-20"
+                      />
+                      <div className="text-4xl font-bold text-white mt-2">
+                        {Math.round(weatherData.main.temp)}°C
+                      </div>
+                      <div className="text-gray-300 mt-1">
+                        {getWeatherDescription(weatherData.weather)}
+                      </div>
+                      <div className="text-gray-400 text-sm mt-2">
+                        Feels like {Math.round(weatherData.main.feels_like)}°C
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Low</span>
-                    <span className="text-white">{Math.round(weather.main.temp_min)}°F</span>
-                  </div>
-                </div>
-              </div>
 
-              {/* Wind Information */}
-              <div className="bg-black/30 rounded-lg p-4 border border-gray-700">
-                <div className="flex items-center mb-2">
-                  <span className="text-lg mr-2">💨</span>
-                  <h4 className="text-white font-semibold">Wind</h4>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Speed</span>
-                    <span className="text-white">{weather.wind.speed} mph</span>
+                  {/* Weather Details */}
+                  <div className="bg-black/30 rounded-lg p-6 border border-gray-700">
+                    <h3 className="text-lg font-semibold text-white mb-4">Weather Details</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Humidity</span>
+                        <span className="text-white">{weatherData.main.humidity}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Wind Speed</span>
+                        <span className="text-white">{weatherData.wind.speed} m/s</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Wind Direction</span>
+                        <span className="text-white">{getWindDirection(weatherData.wind.deg)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Pressure</span>
+                        <span className="text-white">{weatherData.main.pressure} hPa</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-300">Visibility</span>
+                        <span className="text-white">{(weatherData.visibility / 1000).toFixed(1)} km</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Direction</span>
-                    <span className="text-white">{getWindDirection(weather.wind.deg)}</span>
+
+                  {/* Temperature Range */}
+                  <div className="bg-black/30 rounded-lg p-6 border border-gray-700">
+                    <h3 className="text-lg font-semibold text-white mb-4">Temperature Range</h3>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Min</span>
+                        <span className="text-blue-400 font-semibold">{Math.round(weatherData.main.temp_min)}°C</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Max</span>
+                        <span className="text-red-400 font-semibold">{Math.round(weatherData.main.temp_max)}°C</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Location Info */}
+                  <div className="bg-black/30 rounded-lg p-6 border border-gray-700">
+                    <h3 className="text-lg font-semibold text-white mb-4">Location</h3>
+                    <div className="space-y-2">
+                      <div className="text-white font-medium">{weatherData.name}</div>
+                      <div className="text-gray-300 text-sm">{weatherData.sys.country}</div>
+                      <div className="text-gray-400 text-xs">
+                        {new Date(weatherData.dt * 1000).toLocaleString()}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Pressure */}
-              <div className="bg-black/30 rounded-lg p-4 border border-gray-700">
-                <div className="flex items-center mb-2">
-                  <span className="text-lg mr-2">📊</span>
-                  <h4 className="text-white font-semibold">Pressure</h4>
+              ) : (
+                <div className="bg-black/30 rounded-lg p-12 border border-gray-700 text-center">
+                  <div className="text-gray-400 text-lg mb-2">Search for a city to see weather information</div>
+                  <div className="text-gray-500 text-sm">Enter a city name and click search to get started</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">{weather.main.pressure}</div>
-                  <p className="text-gray-400 text-sm">hPa</p>
-                </div>
-              </div>
-
-              {/* Visibility */}
-              <div className="bg-black/30 rounded-lg p-4 border border-gray-700">
-                <div className="flex items-center mb-2">
-                  <span className="text-lg mr-2">👁️</span>
-                  <h4 className="text-white font-semibold">Visibility</h4>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">
-                    {weather.visibility ? Math.round(weather.visibility / 1000) : 'N/A'}
-                  </div>
-                  <p className="text-gray-400 text-sm">km</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Weather Details */}
-            <div className="bg-black/30 rounded-lg p-4 border border-gray-700">
-              <h4 className="text-white font-semibold mb-3">Weather Details</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Cloud Cover</span>
-                  <span className="text-white">{weather.clouds.all}%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Sunrise</span>
-                  <span className="text-white">
-                    {new Date(weather.sys.sunrise * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Sunset</span>
-                  <span className="text-white">
-                    {new Date(weather.sys.sunset * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Coordinates</span>
-                  <span className="text-white">{weather.coord.lat.toFixed(2)}, {weather.coord.lon.toFixed(2)}</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Loading State */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            <span className="ml-3 text-gray-400">Loading weather data...</span>
+        {/* Friends View */}
+        {activeView === 'friends' && (
+          <div className="w-full">
+            <FriendsList onFriendsUpdate={handleFriendsUpdate} />
           </div>
         )}
-      </div>
 
-      {/* Map View */}
-      <div className="flex-1">
-        <MapView center={position} />
+        {/* Locations View */}
+        {activeView === 'locations' && (
+          <div className="w-full">
+            <LocationsList onLocationsUpdate={handleLocationsUpdate} />
+          </div>
+        )}
       </div>
     </div>
   );
