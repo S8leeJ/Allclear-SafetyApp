@@ -47,8 +47,6 @@ A comprehensive safety and emergency management platform that helps users stay c
 
 - **Location Management**
   - Save important locations (Home, Work, Hospitals, Shelters)
-  - Emergency service locations (Police, Fire Stations)
-  - Essential services (Gas Stations, Pharmacies, Banks)
   - Custom location descriptions and categories
 
 ### 💬 **Communication System**
