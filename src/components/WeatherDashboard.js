@@ -26,14 +26,14 @@ export default function WeatherDashboard() {
   const fetchWeatherData = async () => {
     setIsLoading(true);
     setError('');
-    
+
     try {
-      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${searchQuery}&appid=${process.env.REACT_APP_OPENWEATHER_API_KEY}&units=metric`);
-      
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${searchQuery}&appid=${OPENWEATHER_API_KEY}&units=metric`);
+
       if (!response.ok) {
         throw new Error('City not found');
       }
-      
+
       const data = await response.json();
       setWeatherData(data);
       // Update map center to the searched city
@@ -80,7 +80,8 @@ export default function WeatherDashboard() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Weather & Safety Dashboard</h1>
+          <h1 className="text-5xl font-bold text-blue-200 py-5">Weather & Safety Dashboard</h1>
+          
           <p className="text-gray-300">Monitor weather conditions and manage your safety network</p>
         </div>
 
@@ -89,31 +90,28 @@ export default function WeatherDashboard() {
           <div className="bg-black/30 rounded-lg p-1 border border-gray-700">
             <button
               onClick={() => setActiveView('weather')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeView === 'weather'
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${activeView === 'weather'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'text-gray-300 hover:text-white hover:bg-black/20'
-              }`}
+                }`}
             >
               🌤️ Weather
             </button>
             <button
               onClick={() => setActiveView('friends')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeView === 'friends'
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${activeView === 'friends'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'text-gray-300 hover:text-white hover:bg-black/20'
-              }`}
+                }`}
             >
               👥 Friends
             </button>
             <button
               onClick={() => setActiveView('locations')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeView === 'locations'
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${activeView === 'locations'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'text-gray-300 hover:text-white hover:bg-black/20'
-              }`}
+                }`}
             >
               📍 Locations
             </button>
@@ -127,9 +125,9 @@ export default function WeatherDashboard() {
               <h3 className="text-lg font-semibold text-white">Interactive Map with Weather Radar</h3>
               <p className="text-gray-400 text-sm">View your friends, locations, and weather conditions</p>
             </div>
-            <MapView 
-              friends={friends} 
-              locations={locations} 
+            <MapView
+              friends={friends}
+              locations={locations}
               center={mapCenter}
             />
           </div>
@@ -180,9 +178,9 @@ export default function WeatherDashboard() {
                   <div className="bg-black/30 rounded-lg p-6 border border-gray-700">
                     <h3 className="text-lg font-semibold text-white mb-4">Current Weather</h3>
                     <div className="text-center">
-                      <img 
-                        src={getWeatherIcon(weatherData.weather[0].icon)} 
-                        alt="Weather icon" 
+                      <img
+                        src={getWeatherIcon(weatherData.weather[0].icon)}
+                        alt="Weather icon"
                         className="mx-auto w-20 h-20"
                       />
                       <div className="text-4xl font-bold text-white mt-2">

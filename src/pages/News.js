@@ -1,9 +1,9 @@
-export default function Testing() {
+export default function News() {
   return (
     <div dangerouslySetInnerHTML={{ __html: `
       <div class='max-w-6xl mx-auto px-4 py-8'>
         <div class='flex flex-col items-center mb-10'>
-          <span class='text-2xl md:text-3xl font-extrabold tracking-widest text-blue-500 uppercase drop-shadow-lg mb-4 animate-pulse'>Severe Weather Alerts</span>
+          <span class='text-5xl md:text-5xl font-extrabold text-blue-300  drop-shadow-lg mb-4 animate-pulse'>Severe Weather Alerts</span>
           <div class='w-24 h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 rounded-full mb-2'></div>
           <span class='text-base text-gray-300 italic'>Stay informed. Stay safe.</span>
         </div>

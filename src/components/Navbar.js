@@ -49,16 +49,16 @@ export default function Navbar() {
             to="/" 
             className="block px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-600/20 rounded-lg transition-colors duration-200"
           >
-            Home
+            Dashboard
           </Link>
           <Link 
             to="/friends" 
             className="block px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-600/20 rounded-lg transition-colors duration-200"
           >
-            Friends
+            Check-In  
           </Link>
           <Link 
-            to="/testing" 
+            to="/news" 
             className="block px-4 py-3 text-gray-300 hover:text-white hover:bg-blue-600/20 rounded-lg transition-colors duration-200"
           >
             News

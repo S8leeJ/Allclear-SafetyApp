@@ -4,7 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Friends from './pages/Friends';
-import Testing from './pages/Testing';
+import News from './pages/News';
 import Settings from './pages/Settings';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
@@ -46,13 +46,13 @@ export default function App() {
               </ProtectedRoute>
             } />
             
-            <Route path="/testing" element={
+            <Route path="/news" element={
               <ProtectedRoute>
                 <>
                   <Navbar />
                   <div className="ml-64 relative min-h-screen">
                     <div className="max-w-5xl mx-auto px-8 py-12 z-10">
-                      <Testing />
+                      <News />
                     </div>
                   </div>
                 </>
