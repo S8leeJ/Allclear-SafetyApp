@@ -10,6 +10,7 @@ class DisasterMapLayer extends L.Layer {
       ...options
     };
     this.currentLayer = null;
+    this.layerElements = []; // Array to store all layer elements
   }
 
   onAdd(map) {
@@ -26,21 +27,48 @@ class DisasterMapLayer extends L.Layer {
   }
 
   show() {
-    if (this.currentLayer && this.map) {
-      this.currentLayer.addTo(this.map);
+    if (this.layerElements.length > 0 && this.map) {
+      this.layerElements.forEach(element => {
+        if (element && !this.map.hasLayer(element)) {
+          element.addTo(this.map);
+        }
+      });
     }
   }
 
   hide() {
-    if (this.currentLayer && this.map) {
-      this.map.removeLayer(this.currentLayer);
+    if (this.layerElements.length > 0 && this.map) {
+      this.layerElements.forEach(element => {
+        if (element && this.map.hasLayer(element)) {
+          this.map.removeLayer(element);
+        }
+      });
     }
   }
 
   setOpacity(opacity) {
     this.options.opacity = opacity;
-    if (this.currentLayer) {
-      this.currentLayer.setOpacity(opacity);
+    this.layerElements.forEach(element => {
+      if (element) {
+        // Handle different types of Leaflet layers
+        if (element.setOpacity) {
+          // Tile layers have setOpacity method
+          element.setOpacity(opacity);
+        } else if (element.setStyle) {
+          // Circles and other styled elements
+          element.setStyle({ fillOpacity: opacity });
+        }
+      }
+    });
+  }
+
+  // Helper method to add elements to the layer
+  addLayerElement(element) {
+    if (element) {
+      this.layerElements.push(element);
+      if (this.map && this.options.visible) {
+        element.addTo(this.map);
+      }
     }
   }
 }
@@ -63,7 +91,7 @@ export class WildfireLayer extends DisasterMapLayer {
   createLayer() {
     // Using NASA FIRMS (Fire Information for Resource Management System) data
     // This is a demo implementation - in production you'd want to use real-time data
-    this.currentLayer = L.tileLayer(
+    const tileLayer = L.tileLayer(
       'https://firms.modaps.eosdis.nasa.gov/api/area/csv/{z}/{x}/{y}/MODIS_NRT/world/1',
       {
         opacity: this.options.opacity,
@@ -71,6 +99,8 @@ export class WildfireLayer extends DisasterMapLayer {
         maxZoom: 8
       }
     );
+
+    this.addLayerElement(tileLayer);
 
     // Add demo wildfire markers for demonstration
     const demoWildfires = [
@@ -114,8 +144,7 @@ export class WildfireLayer extends DisasterMapLayer {
         iconAnchor: [10, 10]
       });
 
-      L.marker([fire.lat, fire.lng], { icon })
-        .addTo(this.map)
+      const marker = L.marker([fire.lat, fire.lng], { icon })
         .bindPopup(`
           <div style="min-width: 200px;">
             <h3 style="margin: 0 0 8px 0; color: #1F2937; font-weight: bold;">🔥 ${fire.name}</h3>
@@ -126,6 +155,8 @@ export class WildfireLayer extends DisasterMapLayer {
             <p style="margin: 4px 0; color: #6B7280; font-size: 12px;">Last updated: ${new Date().toLocaleString()}</p>
           </div>
         `);
+
+      this.addLayerElement(marker);
     });
   }
 }
@@ -160,10 +191,12 @@ export class HurricaneLayer extends DisasterMapLayer {
     const hurricaneCircle = L.circle(hurricaneData.center, {
       color: '#FF4444',
       fillColor: '#FF6666',
-      fillOpacity: 0.3,
+      fillOpacity: this.options.opacity,
       radius: hurricaneData.radius * 1000, // Convert to meters
       weight: 2
-    }).addTo(this.map);
+    });
+
+    this.addLayerElement(hurricaneCircle);
 
     // Add hurricane center marker
     const icon = L.divIcon({
@@ -196,8 +229,7 @@ export class HurricaneLayer extends DisasterMapLayer {
       iconAnchor: [15, 15]
     });
 
-    L.marker(hurricaneData.center, { icon })
-      .addTo(this.map)
+    const marker = L.marker(hurricaneData.center, { icon })
       .bindPopup(`
         <div style="min-width: 200px;">
           <h3 style="margin: 0 0 8px 0; color: #1F2937; font-weight: bold;">🌀 ${hurricaneData.name}</h3>
@@ -211,7 +243,7 @@ export class HurricaneLayer extends DisasterMapLayer {
         </div>
       `);
 
-    this.currentLayer = hurricaneCircle;
+    this.addLayerElement(marker);
   }
 }
 
@@ -271,8 +303,7 @@ export class TornadoLayer extends DisasterMapLayer {
         iconAnchor: [12.5, 12.5]
       });
 
-      L.marker([tornado.lat, tornado.lng], { icon })
-        .addTo(this.map)
+      const marker = L.marker([tornado.lat, tornado.lng], { icon })
         .bindPopup(`
           <div style="min-width: 200px;">
             <h3 style="margin: 0 0 8px 0; color: #1F2937; font-weight: bold;">🌪️ ${tornado.name}</h3>
@@ -283,6 +314,8 @@ export class TornadoLayer extends DisasterMapLayer {
             <p style="margin: 4px 0; color: #6B7280; font-size: 12px;">Last updated: ${new Date().toLocaleString()}</p>
           </div>
         `);
+
+      this.addLayerElement(marker);
     });
   }
 }
@@ -317,10 +350,12 @@ export class FloodLayer extends DisasterMapLayer {
       const floodCircle = L.circle(area.center, {
         color: severityColor,
         fillColor: severityColor,
-        fillOpacity: 0.4,
+        fillOpacity: this.options.opacity,
         radius: area.radius * 1000, // Convert to meters
         weight: 2
-      }).addTo(this.map);
+      });
+
+      this.addLayerElement(floodCircle);
 
       const icon = L.divIcon({
         className: 'flood-marker',
@@ -345,8 +380,7 @@ export class FloodLayer extends DisasterMapLayer {
         iconAnchor: [10, 10]
       });
 
-      L.marker(area.center, { icon })
-        .addTo(this.map)
+      const marker = L.marker(area.center, { icon })
         .bindPopup(`
           <div style="min-width: 200px;">
             <h3 style="margin: 0 0 8px 0; color: #1F2937; font-weight: bold;">🌊 ${area.name}</h3>
@@ -357,6 +391,8 @@ export class FloodLayer extends DisasterMapLayer {
             <p style="margin: 4px 0; color: #6B7280; font-size: 12px;">Last updated: ${new Date().toLocaleString()}</p>
           </div>
         `);
+
+      this.addLayerElement(marker);
     });
   }
 }
@@ -394,10 +430,12 @@ export class EarthquakeLayer extends DisasterMapLayer {
       const quakeCircle = L.circle([quake.lat, quake.lng], {
         color: magnitudeColor,
         fillColor: magnitudeColor,
-        fillOpacity: 0.6,
+        fillOpacity: this.options.opacity,
         radius: radius * 1000, // Convert to meters
         weight: 2
-      }).addTo(this.map);
+      });
+
+      this.addLayerElement(quakeCircle);
 
       const icon = L.divIcon({
         className: 'earthquake-marker',
@@ -422,8 +460,7 @@ export class EarthquakeLayer extends DisasterMapLayer {
         iconAnchor: [9, 9]
       });
 
-      L.marker([quake.lat, quake.lng], { icon })
-        .addTo(this.map)
+      const marker = L.marker([quake.lat, quake.lng], { icon })
         .bindPopup(`
           <div style="min-width: 200px;">
             <h3 style="margin: 0 0 8px 0; color: #1F2937; font-weight: bold;">🌋 ${quake.name}</h3>
@@ -434,6 +471,8 @@ export class EarthquakeLayer extends DisasterMapLayer {
             <p style="margin: 4px 0; color: #6B7280; font-size: 12px;">Last updated: ${new Date().toLocaleString()}</p>
           </div>
         `);
+
+      this.addLayerElement(marker);
     });
   }
 }

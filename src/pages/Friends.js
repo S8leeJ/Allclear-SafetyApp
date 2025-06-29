@@ -6,7 +6,7 @@ export default function Friends() {
   const [activeTab, setActiveTab] = useState('friends'); // 'friends' or 'messaging'
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-2">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Page Header */}
         <div className="text-center">

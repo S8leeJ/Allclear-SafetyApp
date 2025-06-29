@@ -38,7 +38,7 @@ export default function App() {
                 <>
                   <Navbar />
                   <div className="ml-64 relative min-h-screen">
-                    <div className="max-w-5xl mx-auto px-8 py-12 z-10">
+                    <div className=" mx-auto px-8 py-12 z-10">
                       <Friends />
                     </div>
                   </div>
