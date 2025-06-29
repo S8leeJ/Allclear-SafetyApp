@@ -2,6 +2,14 @@ import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import AnimatedRadarLayer from './AnimatedRadarLayer';
+import { 
+  WildfireLayer, 
+  HurricaneLayer, 
+  TornadoLayer, 
+  FloodLayer, 
+  EarthquakeLayer,
+  DisasterLayerControl 
+} from './DisasterMapLayers';
 
 // Fix for default markers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -16,6 +24,8 @@ export default function MapView({ friends = [], locations = [], center = [29.760
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
   const radarLayerRef = useRef(null);
+  const disasterLayersRef = useRef([]);
+  const layerControlRef = useRef(null);
 
   useEffect(() => {
     if (!mapInstanceRef.current) {
@@ -29,6 +39,26 @@ export default function MapView({ friends = [], locations = [], center = [29.760
       // Add radar layer
       radarLayerRef.current = new AnimatedRadarLayer();
       mapInstanceRef.current.addLayer(radarLayerRef.current);
+
+      // Initialize disaster layers
+      disasterLayersRef.current = [
+        new WildfireLayer({ opacity: 0.7 }),
+        new HurricaneLayer({ opacity: 0.7 }),
+        new TornadoLayer({ opacity: 0.7 }),
+        new FloodLayer({ opacity: 0.7 }),
+        new EarthquakeLayer({ opacity: 0.7 })
+      ];
+
+      // Add disaster layers to map
+      disasterLayersRef.current.forEach(layer => {
+        mapInstanceRef.current.addLayer(layer);
+      });
+
+      // Add layer control
+      layerControlRef.current = new DisasterLayerControl(
+        mapInstanceRef.current, 
+        disasterLayersRef.current
+      );
     }
 
     // Clear existing markers
