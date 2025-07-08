@@ -1,4 +1,4 @@
-# AllClear - Safety Network Platform 🌪️
+# AllClear - Safety Network Platform
 
 A comprehensive safety and emergency management platform that helps users stay connected with their network during disasters and emergencies. Built with React, Node.js, and MongoDB.
 
@@ -7,9 +7,9 @@ A comprehensive safety and emergency management platform that helps users stay c
 ![Node.js](https://img.shields.io/badge/Node.js-Express-brightgreen)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)
 
-## 🚀 Features
+## Features
 
-### 🔐 **Authentication & Security**
+### **Authentication & Security**
 - **Complete User Authentication System**
   - User registration and login with JWT tokens
   - Password strength validation and hashing
@@ -17,7 +17,7 @@ A comprehensive safety and emergency management platform that helps users stay c
   - Session management with automatic token refresh
   - Form validation and error handling
 
-### 🌤️ **Weather & Disaster Monitoring**
+### **Weather & Disaster Monitoring**
 - **Real-time Weather Data**
   - Current weather conditions for any city
   - Temperature, humidity, wind speed, and pressure
@@ -30,14 +30,14 @@ A comprehensive safety and emergency management platform that helps users stay c
   - Historical weather data visualization
 
 - **Multi-Disaster Map Layers**
-  - **🔥 Wildfire Tracking**: Active fire locations with intensity levels
-  - **🌀 Hurricane Monitoring**: Storm tracks and surge predictions
-  - **🌪️ Tornado Warnings**: EF scale ratings and storm paths
-  - **🌊 Flood Zones**: Water levels and flood risk areas
-  - **🌋 Earthquake Data**: Seismic activity with magnitude circles
+  - **Wildfire Tracking**: Active fire locations with intensity levels
+  - **Hurricane Monitoring**: Storm tracks and surge predictions
+  - **Tornado Warnings**: EF scale ratings and storm paths
+  - **Flood Zones**: Water levels and flood risk areas
+  - **Earthquake Data**: Seismic activity with magnitude circles
   - **Layer Controls**: Toggle layers on/off with opacity adjustment
 
-### 👥 **Safety Network Management**
+### **Safety Network Management**
 - **Friends Network**
   - Add and manage safety contacts
   - Real-time location tracking
@@ -49,7 +49,7 @@ A comprehensive safety and emergency management platform that helps users stay c
   - Save important locations (Home, Work, Hospitals, Shelters)
   - Custom location descriptions and categories
 
-### 💬 **Communication System**
+### **Communication System**
 - **Safety Chat Interface**
   - Real-time messaging with network members
   - Emergency status updates
@@ -57,7 +57,7 @@ A comprehensive safety and emergency management platform that helps users stay c
   - Message history and timestamps
   - Status-based chat organization
 
-### 🗺️ **Interactive Mapping**
+### **Interactive Mapping**
 - **Comprehensive Map View**
   - OpenStreetMap integration with Leaflet
   - Real-time friend and location markers
@@ -65,15 +65,7 @@ A comprehensive safety and emergency management platform that helps users stay c
   - Disaster layer toggles
   - Responsive design for all devices
 
-### 📱 **Modern UI/UX**
-- **Responsive Design**
-  - Mobile-first approach
-  - Dark theme with blue accents
-  - Smooth animations and transitions
-  - Intuitive navigation with sidebar
-  - Accessibility features
-
-## 🏗️ **Architecture**
+## **Architecture**
 
 ### **Frontend (React)**
 ```
@@ -115,7 +107,7 @@ server/
 - **Locations Collection**: Saved important locations
 - **Real-time Updates**: Live data synchronization
 
-## 🚀 **Quick Start**
+## **Quick Start**
 
 ### **Prerequisites**
 - Node.js (v14 or higher)
@@ -154,37 +146,6 @@ npm install
 npm start
 ```
 
-### **4. Database Setup**
-Follow the [MongoDB Atlas Setup Guide](MONGODB_SETUP.md) for detailed instructions.
-
-## 📊 **API Endpoints**
-
-### **Authentication**
-- `POST /api/auth/signup` - User registration
-- `POST /api/auth/signin` - User login
-- `GET /api/auth/verify` - Token verification
-
-### **User Management**
-- `GET /api/user/profile` - Get user profile
-- `PUT /api/user/profile` - Update profile
-- `PUT /api/user/password` - Change password
-
-### **Friends Network**
-- `GET /api/friends` - Get all friends
-- `POST /api/friends` - Add new friend
-- `PUT /api/friends/:id/status` - Update friend status
-- `PUT /api/friends/:id/location` - Update friend location
-- `DELETE /api/friends/:id` - Remove friend
-
-### **Locations**
-- `GET /api/locations` - Get all locations
-- `POST /api/locations` - Add new location
-- `PUT /api/locations/:id` - Update location
-- `DELETE /api/locations/:id` - Remove location
-
-### **Health Check**
-- `GET /api/health` - API status and database connection
-
 ## 🛠️ **Technologies Used**
 
 ### **Frontend**
@@ -208,7 +169,7 @@ Follow the [MongoDB Atlas Setup Guide](MONGODB_SETUP.md) for detailed instructio
 - **MongoDB Atlas** - Cloud database
 - **NASA FIRMS** - Fire data (demo)
 
-## 🎯 **Use Cases**
+## **Use Cases**
 
 ### **Emergency Preparedness**
 - Monitor weather conditions in real-time
@@ -248,16 +209,7 @@ NODE_ENV=development
 OPENWEATHER_API_KEY=your-api-key
 ```
 
-### **Testing**
-```bash
-# Frontend tests
-npm test
-
-# Backend health check
-curl http://localhost:5001/api/health
-```
-
-## 🔒 **Security Features**
+## **Security Features**
 
 - **JWT Authentication** with token expiration
 - **Password Hashing** using bcrypt
@@ -265,45 +217,6 @@ curl http://localhost:5001/api/health
 - **Protected Routes** and API endpoints
 - **CORS Configuration** for cross-origin requests
 - **Environment Variables** for sensitive data
-
-## 🚀 **Deployment**
-
-### **Frontend (Vercel/Netlify)**
-```bash
-npm run build
-# Deploy the build folder
-```
-
-### **Backend (Heroku/Railway)**
-```bash
-# Set environment variables
-# Deploy with MongoDB Atlas connection
-```
-
-### **Database (MongoDB Atlas)**
-- Free tier available
-- Automatic backups
-- Global distribution
-- Built-in security
-
-## 🤝 **Contributing**
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📄 **License**
-
-MIT License - feel free to use this project for your own applications!
-
-## 🆘 **Support**
-
-For support and questions:
-- Check the [MongoDB Setup Guide](MONGODB_SETUP.md)
-- Review the troubleshooting section
-- Open an issue on GitHub
 
 ---
 
