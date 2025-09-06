@@ -1,11 +1,18 @@
 # AllClear - Safety Network Platform
 
+
+
+
 A comprehensive safety and emergency management platform that helps users stay connected with their network during disasters and emergencies. Built with React, Node.js, and MongoDB.
 
 ![AllClear Dashboard](https://img.shields.io/badge/Status-Active-brightgreen)
 ![React](https://img.shields.io/badge/React-19.1.0-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-brightgreen)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)
+
+<img width="464" height="295" alt="Screenshot 2025-09-06 at 1 45 14 AM" src="https://github.com/user-attachments/assets/cdba53ff-b178-484b-8d5c-35734a3aa27c" />
+<img width="464" height="295" alt="Screenshot 2025-09-06 at 1 46 16 AM" src="https://github.com/user-attachments/assets/050612f5-4e4d-468b-878c-9c90a70d554c" />
+
 
 ## Features
 
