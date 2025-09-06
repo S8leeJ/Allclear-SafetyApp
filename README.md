@@ -14,7 +14,6 @@ A comprehensive safety and emergency management platform that helps users stay c
 
 ### Demo: [AllClear walkthrough](https://www.youtube.com/watch?v=oH4qrkiLmvw)
 <img width="464" height="295" alt="Screenshot 2025-09-06 at 1 45 14 AM" src="https://github.com/user-attachments/assets/cdba53ff-b178-484b-8d5c-35734a3aa27c" />
-<img width="464" height="240" alt="Screenshot 2025-09-06 at 1 46 16 AM" src="https://github.com/user-attachments/assets/050612f5-4e4d-468b-878c-9c90a70d554c" />
 <img width="464" height="295" alt="Screenshot 2025-09-06 at 5 22 57 PM" src="https://github.com/user-attachments/assets/174a98da-c2a9-49b6-a34b-e6d2307a62c4" />
 <img width="464" height="295" alt="Screenshot 2025-09-06 at 5 26 55 PM" src="https://github.com/user-attachments/assets/ceb70c7c-5c98-46fe-9383-0e224361ab89" />
 
